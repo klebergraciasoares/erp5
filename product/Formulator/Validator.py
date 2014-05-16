@@ -293,6 +293,23 @@ class FloatValidator(StringBaseValidator):
   message_names = StringBaseValidator.message_names + ['not_float']
 
   not_float = "You did not enter a floating point number."
+  wrong_precision = "You input invalid precision number."
+
+  def _validatePrecision(self, field, value, decimal_point):
+    if not field.get_value('editable'):
+      # if it is not editable, assume that it is not user input
+      return value
+    precision = field.get_value('precision')
+    if precision == '' or precision is None:
+      # need to validate when precision is 0
+      return value
+    index = value.find(decimal_point)
+    if index < 0:
+      return value
+    input_precision_length = len(value[index+1:])
+    if input_precision_length > int(precision):
+      self.raise_error('not_float', field)
+    return value
 
   def validate(self, field, key, REQUEST):
     value = StringBaseValidator.validate(self, field, key, REQUEST)
@@ -320,10 +337,12 @@ class FloatValidator(StringBaseValidator):
       decimal_separator = ','
       decimal_point = '.'
 
+
     value = value.replace(decimal_separator,'')
     input_style = field.get_value('input_style')
     if value.find(decimal_point) >= 0:
       value = value.replace(decimal_point, '.')
+      value = self._validatePrecision(field, value, decimal_point)
     if value.find('%') >= 0:
       value = value.replace('%', '')
     try:

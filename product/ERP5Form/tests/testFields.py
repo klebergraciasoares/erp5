@@ -231,6 +231,15 @@ class TestFloatField(ERP5TypeTestCase):
     self.assertRaises(ValidationError,
         self.validator.validate, self.field, 'field_test_field', self.portal.REQUEST)
 
+  def test_validate_precision0(self):
+    self.field.values['input_style'] = '-1234.5'
+    self.field.values['precision'] = 0
+    self.field.values['editable'] = 1
+    self.portal.REQUEST.set('field_test_field', '1.00')
+    self.assertRaises(ValidationError,
+      self.validator.validate, self.field, 'field_test_field',
+      self.portal.REQUEST)
+
   def test_render_odt(self):
     self.field.values['input_style'] = '-1 234.5'
     self.field.values['default'] = 1000
