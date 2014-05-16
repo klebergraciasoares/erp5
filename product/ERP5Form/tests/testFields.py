@@ -232,10 +232,20 @@ class TestFloatField(ERP5TypeTestCase):
         self.validator.validate, self.field, 'field_test_field', self.portal.REQUEST)
 
   def test_validate_precision0(self):
-    self.field.values['input_style'] = '-1234.5'
+    # Check the consistency among the precision and user inputs
+    self.field.values['input_style'] = '-1,234.5'
     self.field.values['precision'] = 0
-    self.field.values['editable'] = 1
     self.portal.REQUEST.set('field_test_field', '1.00')
+    self.assertRaises(ValidationError,
+      self.validator.validate, self.field, 'field_test_field',
+      self.portal.REQUEST)
+
+  def test_validate_precision0_with_percent(self):
+    # Check the precision and user inputs when the style is '%'
+    self.field.values['input_style'] = '-12.5%'
+    self.field.values['precision'] = 1
+    self.assertEqual('12.5%', self.widget.format_value(self.field, 0.125))
+    self.portal.REQUEST.set('field_test_field', '0.1255')
     self.assertRaises(ValidationError,
       self.validator.validate, self.field, 'field_test_field',
       self.portal.REQUEST)
