@@ -298,6 +298,8 @@ class FloatValidator(StringBaseValidator):
 
   def _validatePrecision(self, field, value, decimal_point, input_style):
     """ Validate the consistency among the precision and the user inputs """
+    if not field.has_value('precision'):
+      return value
     precision = field.get_value('precision')
     if precision == '' or precision is None:
       # need to validate when the precision is 0
